@@ -1,11 +1,15 @@
 package textarea
 
 import (
+	"time"
+
+	"github.com/charmbracelet/bubbles/stopwatch"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type Model struct {
+	stopwatch stopwatch.Model
 	target    string
 	correct   []int
 	incorrect []int
@@ -34,8 +38,8 @@ func DefaultStyles() Style {
 }
 
 func New() Model {
-
 	return Model{
+		stopwatch: stopwatch.NewWithInterval(time.Millisecond),
 		target:    "large seem give nation number think down part head one which early find possible like",
 		correct:   []int{},
 		incorrect: []int{},
@@ -49,6 +53,8 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -62,13 +68,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		default:
 			m.addCurrent(msg.String())
 			m.cursor++
+			if !m.stopwatch.Running() {
+				return m, m.stopwatch.Start()
+			}
 			if len(m.correct)+len(m.incorrect) == len(m.target) {
-				return m, tea.Quit
+				return m, m.stopwatch.Stop()
 			}
 		}
 	}
-
-	return m, nil
+	m.stopwatch, cmd = m.stopwatch.Update(msg)
+	return m, cmd
 }
 
 func (m *Model) removePrevious() {
@@ -88,5 +97,7 @@ func (m *Model) addCurrent(msg string) {
 }
 
 func (m Model) View() string {
-	return lipgloss.StyleRunes(m.target[:m.cursor], m.correct, m.style.Correct, m.style.Incorrect) + m.target[m.cursor:]
+	s := m.stopwatch.View() + "\n"
+	s += lipgloss.StyleRunes(m.target[:m.cursor], m.correct, m.style.Correct, m.style.Incorrect) + m.target[m.cursor:]
+	return s
 }
