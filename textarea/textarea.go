@@ -39,7 +39,7 @@ func DefaultStyles() Style {
 
 func New() Model {
 	return Model{
-		stopwatch: stopwatch.NewWithInterval(time.Millisecond),
+		stopwatch: stopwatch.NewWithInterval(time.Second),
 		target:    "large seem give nation number think down part head one which early find possible like",
 		correct:   []int{},
 		incorrect: []int{},
