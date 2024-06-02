@@ -1,6 +1,7 @@
 package textarea
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/charmbracelet/bubbles/stopwatch"
@@ -39,7 +40,7 @@ func DefaultStyles() Style {
 
 func New() Model {
 	return Model{
-		stopwatch: stopwatch.NewWithInterval(time.Second),
+		stopwatch: stopwatch.NewWithInterval(time.Millisecond),
 		target:    "large seem give nation number think down part head one which early find possible like",
 		correct:   []int{},
 		incorrect: []int{},
@@ -80,24 +81,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *Model) removePrevious() {
-	if len(m.correct) > 0 && m.correct[len(m.correct)-1] == m.cursor {
-		m.correct = m.correct[:len(m.correct)-1]
-	} else {
-		m.incorrect = m.incorrect[:len(m.incorrect)-1]
-	}
-}
-
-func (m *Model) addCurrent(msg string) {
-	if msg == string(m.target[m.cursor]) {
-		m.correct = append(m.correct, m.cursor)
-	} else {
-		m.incorrect = append(m.incorrect, m.cursor)
-	}
-}
-
 func (m Model) View() string {
 	s := m.stopwatch.View() + "\n"
 	s += lipgloss.StyleRunes(m.target[:m.cursor], m.correct, m.style.Correct, m.style.Incorrect) + m.target[m.cursor:]
-	return s
+	return s + fmt.Sprintf(" %dwpm", int(m.calcWPM()))
 }
