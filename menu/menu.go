@@ -1,7 +1,8 @@
 package menu
 
 import (
-	"github.com/charmbracelet/bubbles/list"
+	"fmt"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -14,54 +15,63 @@ const (
 
 type item struct {
 	title         string
-	description   string
 	programStatus ProgramStatus
 }
 
-func (i item) Title() string       { return i.title }
-func (i item) Description() string { return i.description }
-func (i item) FilterValue() string { return i.title }
-
-type Model struct {
-	list   list.Model
-	choice string
+type model struct {
+	options      []item
+	activeOption int
+	selected     item
 }
 
-func New() Model {
-	items := []list.Item{
-		item{title: "test", description: "test", programStatus: testView},
-		item{title: "stats", description: "stats", programStatus: statsView},
+func New() model {
+	options := []item{
+		{title: "test", programStatus: testView},
+		{title: "stats", programStatus: statsView},
 	}
 
-	l := list.New(items, list.NewDefaultDelegate(), 20, 20)
-	l.SetFilteringEnabled(false)
-	l.SetShowStatusBar(false)
-	l.SetShowTitle(false)
-	return Model{list: l}
+	return model{options: options, activeOption: 0}
 }
 
-func (m Model) Init() tea.Cmd {
+func (m model) Init() tea.Cmd {
 	return nil
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		m.list.SetWidth(msg.Width)
-		return m, nil
 	case tea.KeyMsg:
 		switch msg.String() {
+		case "ctrl+c", "q":
+			return m, tea.Quit
+		case "j", "down":
+			if m.activeOption < len(m.options)-1 {
+				m.activeOption++
+			} else {
+				m.activeOption = 0
+			}
+		case "k", "up":
+			if m.activeOption > 0 {
+				m.activeOption--
+			} else {
+				m.activeOption = len(m.options) - 1
+			}
 		case "enter":
-			i := m.list.SelectedItem()
-			m.choice = i.FilterValue()
+			m.selected = m.options[m.activeOption]
 		}
 	}
-	m.list, cmd = m.list.Update(msg)
 	return m, cmd
 }
 
-func (m Model) View() string {
-	return m.list.View() + m.choice
+func (m model) View() string {
+	s := ""
+	for i, option := range m.options {
+		if i == m.activeOption {
+			s += ">"
+		}
+		s += fmt.Sprintf("%s\n", option.title)
+	}
+	s += m.selected.title + fmt.Sprint(m.selected.programStatus)
+	return s
 }
