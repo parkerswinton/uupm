@@ -1,9 +1,8 @@
 package menu
 
 import (
-	"fmt"
-
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type ProgramStatus int
@@ -12,6 +11,12 @@ const (
 	testView ProgramStatus = iota
 	statsView
 )
+
+const banner = ` _   _ _   _ ____  ____
+| | | | | | |  _ \|    \ 
+| |_| | |_| | |_| | | | |
+|____/|____/|  __/|_|_|_|
+            |_|          `
 
 type item struct {
 	title         string
@@ -22,6 +27,12 @@ type model struct {
 	options      []item
 	activeOption int
 	selected     item
+	style        style
+}
+
+type style struct {
+	base   lipgloss.Style
+	active lipgloss.Style
 }
 
 func New() model {
@@ -30,7 +41,10 @@ func New() model {
 		{title: "stats", programStatus: statsView},
 	}
 
-	return model{options: options, activeOption: 0}
+	return model{options: options, activeOption: 0, style: style{
+		base:   lipgloss.NewStyle().Bold(false).Foreground(lipgloss.Color("#7aa2f7")),
+		active: lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#4fd6be")),
+	}}
 }
 
 func (m model) Init() tea.Cmd {
@@ -65,13 +79,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	s := ""
+	lines := []string{m.style.base.Render(banner)}
 	for i, option := range m.options {
 		if i == m.activeOption {
-			s += ">"
+			lines = append(lines, m.style.active.Render("> "+option.title))
+		} else {
+			lines = append(lines, m.style.base.Render(option.title))
 		}
-		s += fmt.Sprintf("%s\n", option.title)
 	}
-	s += m.selected.title + fmt.Sprint(m.selected.programStatus)
-	return s
+	return lipgloss.JoinVertical(lipgloss.Left, lines...)
 }
