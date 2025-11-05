@@ -1,6 +1,8 @@
 package menu
 
 import (
+	"strings"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -42,8 +44,8 @@ type style struct {
 
 func New() model {
 	options := []item{
-		{title: "test", programStatus: testView},
-		{title: "stats", programStatus: statsView},
+		{title: "test   ", programStatus: testView},
+		{title: "stats  ", programStatus: statsView},
 		{title: "options", programStatus: optionsView},
 	}
 
@@ -108,5 +110,5 @@ func (m model) View() string {
 		}
 	}
 
-	return container.Render(lipgloss.JoinVertical(lipgloss.Left, lines...))
+	return container.Render(strings.Join(lines, "\n"))
 }
