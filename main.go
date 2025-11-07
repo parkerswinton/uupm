@@ -5,7 +5,7 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/parkerswinton/uupm/menu"
+	"github.com/parkerswinton/uupm/views"
 )
 
 func main() {
@@ -16,7 +16,7 @@ func main() {
 	}
 	defer f.Close()
 
-	p := tea.NewProgram(menu.New())
+	p := tea.NewProgram(views.NewApp(), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("ERRORS: %v", err)
 		os.Exit(1)

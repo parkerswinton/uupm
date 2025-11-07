@@ -1,4 +1,4 @@
-package menu
+package views
 
 import (
 	"strings"
@@ -7,31 +7,20 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type ProgramStatus int
-
-const (
-	testView ProgramStatus = iota
-	statsView
-	optionsView
-)
-
 const banner = ` _   _ _   _ ____  ____
 | | | | | | |  _ \|    \ 
 | |_| | |_| | |_| | | | |
 |____/|____/|  __/|_|_|_|
             |_|          `
 
-const Margin = 4
-
 type item struct {
 	title         string
 	programStatus ProgramStatus
 }
 
-type model struct {
+type MenuModel struct {
 	options      []item
 	activeOption int
-	selected     item
 	style        style
 }
 
@@ -42,24 +31,24 @@ type style struct {
 	secondary lipgloss.Color
 }
 
-func New() model {
+func NewMenuModel() MenuModel {
 	options := []item{
-		{title: "test   ", programStatus: testView},
-		{title: "stats  ", programStatus: statsView},
-		{title: "options", programStatus: optionsView},
+		{title: "test   ", programStatus: TestView},
+		{title: "stats  ", programStatus: StatsView},
+		{title: "options", programStatus: OptionsView},
 	}
 
-	return model{options: options, activeOption: 0, style: style{
+	return MenuModel{options: options, activeOption: 0, style: style{
 		primary:   lipgloss.Color("#7aa2f7"),
 		secondary: lipgloss.Color("#4fd6be"),
 	}}
 }
 
-func (m model) Init() tea.Cmd {
+func (m MenuModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m MenuModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
@@ -80,7 +69,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.activeOption = len(m.options) - 1
 			}
 		case "enter":
-			m.selected = m.options[m.activeOption]
+			cmd = SwitchProgramStatusCmd(m.options[m.activeOption].programStatus)
 		}
 	case tea.WindowSizeMsg:
 		m.style.height = msg.Height
@@ -89,15 +78,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) View() string {
-
-	container := lipgloss.NewStyle().
-		Width(m.style.width-Margin).
-		Height(m.style.height-Margin).
-		Align(lipgloss.Center, lipgloss.Center).
-		Border(lipgloss.DoubleBorder()).
-		BorderForeground(m.style.primary)
-
+func (m MenuModel) View() string {
 	content := lipgloss.NewStyle().Foreground(m.style.primary)
 	hovered := lipgloss.NewStyle().Foreground(m.style.secondary).Bold(true)
 
@@ -110,5 +91,5 @@ func (m model) View() string {
 		}
 	}
 
-	return container.Render(strings.Join(lines, "\n"))
+	return strings.Join(lines, "\n")
 }
