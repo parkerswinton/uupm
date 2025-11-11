@@ -33,7 +33,7 @@ type style struct {
 
 func NewMenuModel() MenuModel {
 	options := []item{
-		{title: "test   ", programStatus: TestView},
+		{title: "test   ", programStatus: TypingView},
 		{title: "stats  ", programStatus: StatsView},
 		{title: "options", programStatus: OptionsView},
 	}

@@ -14,13 +14,6 @@ func (m StatsModel) Init() tea.Cmd {
 }
 
 func (m StatsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "esc":
-			return m, SwitchProgramStatusCmd(MenuView)
-		}
-	}
 	return m, nil
 }
 

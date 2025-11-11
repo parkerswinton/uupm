@@ -11,7 +11,7 @@ type ProgramStatus int
 
 const (
 	MenuView ProgramStatus = iota
-	TestView
+	TypingView
 	StatsView
 	OptionsView
 )
@@ -48,9 +48,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
+		case "esc":
+			return m, SwitchProgramStatusCmd(MenuView)
 		}
 	case SwitchProgramStatusMsg:
-		m.setChild(msg.target)
+		m.child = m.createChild(msg.target)
 		cmd = m.initChild()
 		return m, cmd
 	case tea.WindowSizeMsg:
@@ -89,15 +91,20 @@ func SwitchProgramStatusCmd(target ProgramStatus) tea.Cmd {
 	}
 }
 
-func (m *model) setChild(target ProgramStatus) {
+func (m model) createChild(target ProgramStatus) tea.Model {
 	switch target {
 	case MenuView:
-		m.child = NewMenuModel()
+		return NewMenuModel()
+	case TypingView:
+		return NewTypingModel()
 	case StatsView:
-		m.child = NewStatsModel()
+		return NewStatsModel()
+	case OptionsView:
+		return NewOptionsModel()
 	}
+	return nil
 }
 
-func (m *model) initChild() tea.Cmd {
+func (m model) initChild() tea.Cmd {
 	return m.child.Init()
 }
